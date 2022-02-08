@@ -1,12 +1,24 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
-use App\Instrument;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Instrument::class, function (Faker $faker) {
-    return [
-        //
-    ];
-});
+class InstrumentFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'latitude' => $this->faker->latitude(),
+            'longtitude' => $this->faker->longitude(),
+            'hole_description' => $this->faker->text(100),
+            'dip' => $this->faker->randomFloat(4, 0, 360),
+            'azimuth' => $this->faker->randomFloat(4, 0, 360),
+        ];
+    }
+}

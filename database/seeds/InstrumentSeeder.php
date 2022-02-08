@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Models\Reading;
+use App\Models\Instrument;
 
 class InstrumentSeeder extends Seeder
 {
@@ -11,6 +13,8 @@ class InstrumentSeeder extends Seeder
      */
     public function run()
     {
-        //
+        Instrument::factory()->count(3)
+            ->has(Reading::factory()->count(50))
+            ->create();
     }
 }
