@@ -21,6 +21,7 @@ window.Vue = require('vue').default;
 
 Vue.component('login', require('./components/Login.vue').default);
 Vue.component('listpage', require('./components/List.vue').default);
+Vue.component('readings', require('./components/Readings.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
