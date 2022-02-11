@@ -1,5 +1,6 @@
 <template>
     <div class="row border py-3">
+        <h2>Readings</h2>
         <div class="col-4 pl-0">
             <div class="list-group" id="list-tab" role="tablist">
                 <a v-if="readings" v-for="reading in readings" href="#" @click="individualreading=reading"
