@@ -5222,6 +5222,10 @@ __webpack_require__.r(__webpack_exports__);
         return {
           active: true
         };
+      } else if (reading.invalid) {
+        return {
+          'bg-danger': true
+        };
       }
     },
     fetchdata: function fetchdata() {

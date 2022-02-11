@@ -14,6 +14,7 @@ class InstrumentFactory extends Factory
     public function definition()
     {
         return [
+            'name' => $this->faker->city(),
             'latitude' => $this->faker->latitude(),
             'longtitude' => $this->faker->longitude(),
             'hole_description' => $this->faker->text(100),

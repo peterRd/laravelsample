@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Observers\ReadingObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Reading extends Model

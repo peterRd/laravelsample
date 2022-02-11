@@ -20,20 +20,3 @@ class ReadingFactory extends Factory
         ];
     }
 }
-
-
-//$factory->define(Reading::class, function(Faker $faker) {
-//    return [
-//        'depth' => $faker->randomFloat(),
-//        'dip' => $faker->randomFloat(null, 0, 360),
-//        'azimuth' => $faker->randomFloat(null, 0, 360),
-//    ];
-//});
-//
-//$factory->afterCreating(Instrument::class, function (Instrument $instrument, Faker $faker) {
-//    $instrument->readings()->createMany(
-//        factory(Reading::Class, 500)
-//            ->make()
-//            ->toArray()
-//    );
-//});

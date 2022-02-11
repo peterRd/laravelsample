@@ -56,6 +56,8 @@ export default {
         setActive: function(reading){
             if (this.individualreading.id == reading.id) {
                 return {active: true};
+            } else if (reading.invalid){
+                return {'bg-danger': true};
             }
         },
         fetchdata: function() {

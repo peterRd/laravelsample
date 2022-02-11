@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Reading;
+use Illuminate\Support\Facades\DB;
 
 class ReadingObserver
 {
@@ -14,7 +15,8 @@ class ReadingObserver
      */
     public function created(Reading $reading)
     {
-        //
+        $reading->invalid = $this->isRecordValid($reading);
+        $reading->save();
     }
 
     /**
@@ -25,39 +27,30 @@ class ReadingObserver
      */
     public function updated(Reading $reading)
     {
-        //
+        if (!$reading->wasChanged('invalid')) {
+            $reading->invalid = $this->isRecordValid($reading);
+            $reading->save();
+        }
     }
 
-    /**
-     * Handle the Reading "deleted" event.
-     *
-     * @param  \App\Models\Reading  $reading
-     * @return void
-     */
-    public function deleted(Reading $reading)
-    {
-        //
-    }
+    protected function isRecordValid(Reading $reading) {
+        $dip = DB::table('readings')
+            ->where("created_at", "<", $reading->created_at)
+            ->where("instrument_id", $reading->instrument_id)
+            ->where("id",'!=', $reading->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->avg('dip');
 
-    /**
-     * Handle the Reading "restored" event.
-     *
-     * @param  \App\Models\Reading  $reading
-     * @return void
-     */
-    public function restored(Reading $reading)
-    {
-        //
-    }
+        $previous = Reading::where("created_at", "<", $reading->created_at)
+            ->where("instrument_id", $reading->instrument_id)
+            ->where("id",'!=', $reading->id)->first();
 
-    /**
-     * Handle the Reading "force deleted" event.
-     *
-     * @param  \App\Models\Reading  $reading
-     * @return void
-     */
-    public function forceDeleted(Reading $reading)
-    {
-        //
+        if ($dip && $previous &&
+            (abs($reading->dip - $dip) > 3 || abs($reading->azimuth - $previous->azimuth) > 5)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Reading;
+use App\Observers\ReadingObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -28,7 +30,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
-        //
+        Reading::observe(ReadingObserver::class);
     }
 }
