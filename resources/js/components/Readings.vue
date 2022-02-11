@@ -1,18 +1,28 @@
 <template>
-    <div class="row border">
-        <div class="col-4 pl-0 flex-fill">
+    <div class="row border py-3">
+        <div class="col-4 pl-0">
             <div class="list-group" id="list-tab" role="tablist">
-                <a v-if="readings" v-for="reading in readings" href="#" @click="updateSelected(reading)"class="list-group-item list-group-item-action">
+                <a v-if="readings" v-for="reading in readings" href="#" @click="individualreading=reading"
+                   class="list-group-item list-group-item-action" data-toggle="list" role="tab"
+                    :class="setActive(reading)">
                     Reading #{{reading.id}}
                 </a>
             </div>
         </div>
         <div class="col-4 description border-1">
-            <div id="readings-content" v-if="individualreading" v-model="individualreading">
+            <div id="readings-content" v-if="individualreading.id" v-model="individualreading">
                 <p>Name: Reading #{{individualreading.id}}</p>
                 <p>Azimuth: {{individualreading.azimuth}}</p>
                 <p>Dip: {{individualreading.dip}}</p>
-                <p>Depth: {{individualreading.depth}}</p>
+                <div v-if="editing">
+                    <label for="depth">Depth</label>
+                    <input id="depth" name="depth" type="number" v-model="individualreading.depth"/>
+                </div>
+                <p v-else>Depth: {{individualreading.depth}}</p>
+                <div class="mt-3">
+                    <button class="btn btn-primary" v-if="!editing" @click="editing=true">Edit</button>
+                    <button class="btn btn-primary" v-else @click="updateReading">Save</button>
+                </div>
             </div>
         </div>
     </div>
@@ -22,18 +32,32 @@ export default {
     mounted() {
         this.fetchdata();
     },
-    updated() {
-        this.fetchdata();
-    },
     props: ['selected'],
     data() {
         return {
-            errors: [],
             readings: [],
-            individualreading: null,
+            individualreading: {
+                id: "",
+                depth: 0
+            },
+            editing: false,
+        }
+    },
+    watch: {
+        selected: function() {
+            this.fetchdata()
+            this.individualreading = {
+                id: "",
+                depth: 0
+            };
         }
     },
     methods:{
+        setActive: function(reading){
+            if (this.individualreading.id == reading.id) {
+                return {active: true};
+            }
+        },
         fetchdata: function() {
             const vm = this;
             axios.get('/readings/' + this.selected.id).then(function(response, status, request) {
@@ -43,29 +67,18 @@ export default {
                 })
             });
         },
-        updateSelected: function(selected) {
-            this.individualreading = selected;
+        updateReading: function() {
+            axios.post('/reading/' + this.individualreading.id, this.individualreading).then((res) => {
+                if (res.data.success) {
+                    this.editing = false;
+                    alert('Reading successfully updated');
+                } else {
+                    alert('Could not update reading.');
+                }
+            }).catch(() => {
+                this.editing = true;
+            })
         },
-        checkForm: function (e) {
-            this.errors = [];
-            if (!this.email) {
-                this.errors.push('Email required.');
-            }
-
-            if (!this.password) {
-                this.errors.push('Password required.');
-            }
-
-            if (!this.errors.length){
-                axios.post('/login', {'email': this.$data.email, 'password': this.$data.password}).then(function(response, status, request) {
-                    window.location.href = "/home";
-                }, function() {
-                    console.log('failed');
-                });
-            }
-
-            e.preventDefault();
-        }
     }
 }
 </script>

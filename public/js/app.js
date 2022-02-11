@@ -5029,11 +5029,20 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       errors: [],
-      selected: null,
+      selected: {
+        id: ""
+      },
       instruments: []
     };
   },
   methods: {
+    setActive: function setActive(reading) {
+      if (this.selected.id == reading.id) {
+        return {
+          active: true
+        };
+      }
+    },
     fetchdata: function fetchdata() {
       var vm = this;
       axios.get('/instruments').then(function (response, status, request) {
@@ -5041,33 +5050,6 @@ __webpack_require__.r(__webpack_exports__);
           vm.instruments.push(item);
         });
       });
-    },
-    updateSelected: function updateSelected(selected) {
-      this.selected = selected;
-    },
-    checkForm: function checkForm(e) {
-      this.errors = [];
-
-      if (!this.email) {
-        this.errors.push('Email required.');
-      }
-
-      if (!this.password) {
-        this.errors.push('Password required.');
-      }
-
-      if (!this.errors.length) {
-        axios.post('/login', {
-          'email': this.$data.email,
-          'password': this.$data.password
-        }).then(function (response, status, request) {
-          window.location.href = "/home";
-        }, function () {
-          console.log('failed');
-        });
-      }
-
-      e.preventDefault();
     }
   }
 });
@@ -5164,8 +5146,6 @@ __webpack_require__.r(__webpack_exports__);
           console.log('failed');
         });
       }
-
-      e.preventDefault();
     }
   }
 });
@@ -5202,22 +5182,48 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   mounted: function mounted() {
-    this.fetchdata();
-  },
-  updated: function updated() {
     this.fetchdata();
   },
   props: ['selected'],
   data: function data() {
     return {
-      errors: [],
       readings: [],
-      individualreading: null
+      individualreading: {
+        id: "",
+        depth: 0
+      },
+      editing: false
     };
   },
+  watch: {
+    selected: function selected() {
+      this.fetchdata();
+      this.individualreading = {
+        id: "",
+        depth: 0
+      };
+    }
+  },
   methods: {
+    setActive: function setActive(reading) {
+      if (this.individualreading.id == reading.id) {
+        return {
+          active: true
+        };
+      }
+    },
     fetchdata: function fetchdata() {
       var vm = this;
       axios.get('/readings/' + this.selected.id).then(function (response, status, request) {
@@ -5227,32 +5233,19 @@ __webpack_require__.r(__webpack_exports__);
         });
       });
     },
-    updateSelected: function updateSelected(selected) {
-      this.individualreading = selected;
-    },
-    checkForm: function checkForm(e) {
-      this.errors = [];
+    updateReading: function updateReading() {
+      var _this = this;
 
-      if (!this.email) {
-        this.errors.push('Email required.');
-      }
-
-      if (!this.password) {
-        this.errors.push('Password required.');
-      }
-
-      if (!this.errors.length) {
-        axios.post('/login', {
-          'email': this.$data.email,
-          'password': this.$data.password
-        }).then(function (response, status, request) {
-          window.location.href = "/home";
-        }, function () {
-          console.log('failed');
-        });
-      }
-
-      e.preventDefault();
+      axios.post('/reading/' + this.individualreading.id, this.individualreading).then(function (res) {
+        if (res.data.success) {
+          _this.editing = false;
+          alert('Reading successfully updated');
+        } else {
+          alert('Could not update reading.');
+        }
+      })["catch"](function () {
+        _this.editing = true;
+      });
     }
   }
 });
@@ -5280,12 +5273,12 @@ window.Vue = (__webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js
  *
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('login', (__webpack_require__(/*! ./components/Login.vue */ "./resources/js/components/Login.vue")["default"]));
-Vue.component('listpage', (__webpack_require__(/*! ./components/List.vue */ "./resources/js/components/List.vue")["default"]));
-Vue.component('readings', (__webpack_require__(/*! ./components/Readings.vue */ "./resources/js/components/Readings.vue")["default"]));
+var files = __webpack_require__("./resources/js sync recursive \\.vue$/");
+
+files.keys().map(function (key) {
+  return Vue.component(key.split('/').pop().split('.')[0], files(key)["default"]);
+});
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -28016,7 +28009,7 @@ var render = function () {
     "div",
     { staticClass: "container" },
     [
-      _c("div", { staticClass: "row border" }, [
+      _c("div", { staticClass: "row border py-3" }, [
         _c("div", { staticClass: "col-4 pl-0 flex-fill" }, [
           _c(
             "div",
@@ -28029,10 +28022,11 @@ var render = function () {
                 "a",
                 {
                   staticClass: "list-group-item list-group-item-action",
+                  class: _vm.setActive(instrument),
                   attrs: { href: "#" },
                   on: {
                     click: function ($event) {
-                      return _vm.updateSelected(instrument)
+                      _vm.selected = instrument
                     },
                   },
                 },
@@ -28051,7 +28045,7 @@ var render = function () {
         _vm._v(" "),
         _c("div", { staticClass: "col-8" }, [
           _c("div", { staticClass: "description border-1" }, [
-            _vm.selected
+            _vm.selected.id
               ? _c(
                   "div",
                   {
@@ -28089,7 +28083,7 @@ var render = function () {
         ]),
       ]),
       _vm._v(" "),
-      _vm.selected
+      _vm.selected.id
         ? _c("readings", { attrs: { selected: _vm.selected } })
         : _vm._e(),
     ],
@@ -28153,20 +28147,25 @@ var render = function () {
               "form",
               {
                 attrs: { id: "createAdministrator" },
-                on: { submit: _vm.checkForm },
+                on: {
+                  submit: function ($event) {
+                    $event.preventDefault()
+                    return _vm.checkForm.apply(null, arguments)
+                  },
+                },
               },
               [
                 _c("div", { staticClass: "row mb-3" }, [
+                  _c(
+                    "label",
+                    {
+                      staticClass: "col-md-4 col-form-label text-md-end",
+                      attrs: { for: "email" },
+                    },
+                    [_vm._v("Email Address")]
+                  ),
+                  _vm._v(" "),
                   _c("div", { staticClass: "col-md-6" }, [
-                    _c(
-                      "label",
-                      {
-                        staticClass: "col-md-4 col-form-label text-md-end",
-                        attrs: { for: "email" },
-                      },
-                      [_vm._v("Email Address")]
-                    ),
-                    _vm._v(" "),
                     _c("input", {
                       directives: [
                         {
@@ -28200,16 +28199,16 @@ var render = function () {
                 ]),
                 _vm._v(" "),
                 _c("div", { staticClass: "row mb-3" }, [
+                  _c(
+                    "label",
+                    {
+                      staticClass: "col-md-4 col-form-label text-md-end",
+                      attrs: { for: "password" },
+                    },
+                    [_vm._v("Password")]
+                  ),
+                  _vm._v(" "),
                   _c("div", { staticClass: "col-md-6" }, [
-                    _c(
-                      "label",
-                      {
-                        staticClass: "col-md-4 col-form-label text-md-end",
-                        attrs: { for: "password" },
-                      },
-                      [_vm._v("Password")]
-                    ),
-                    _vm._v(" "),
                     _c("input", {
                       directives: [
                         {
@@ -28292,8 +28291,8 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row border" }, [
-    _c("div", { staticClass: "col-4 pl-0 flex-fill" }, [
+  return _c("div", { staticClass: "row border py-3" }, [
+    _c("div", { staticClass: "col-4 pl-0" }, [
       _c(
         "div",
         {
@@ -28306,10 +28305,11 @@ var render = function () {
                 "a",
                 {
                   staticClass: "list-group-item list-group-item-action",
-                  attrs: { href: "#" },
+                  class: _vm.setActive(reading),
+                  attrs: { href: "#", "data-toggle": "list", role: "tab" },
                   on: {
                     click: function ($event) {
-                      return _vm.updateSelected(reading)
+                      _vm.individualreading = reading
                     },
                   },
                 },
@@ -28328,7 +28328,7 @@ var render = function () {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "col-4 description border-1" }, [
-      _vm.individualreading
+      _vm.individualreading.id
         ? _c(
             "div",
             {
@@ -28352,8 +28352,61 @@ var render = function () {
               _vm._v(" "),
               _c("p", [_vm._v("Dip: " + _vm._s(_vm.individualreading.dip))]),
               _vm._v(" "),
-              _c("p", [
-                _vm._v("Depth: " + _vm._s(_vm.individualreading.depth)),
+              _vm.editing
+                ? _c("div", [
+                    _c("label", { attrs: { for: "depth" } }, [_vm._v("Depth")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.individualreading.depth,
+                          expression: "individualreading.depth",
+                        },
+                      ],
+                      attrs: { id: "depth", name: "depth", type: "number" },
+                      domProps: { value: _vm.individualreading.depth },
+                      on: {
+                        input: function ($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.individualreading,
+                            "depth",
+                            $event.target.value
+                          )
+                        },
+                      },
+                    }),
+                  ])
+                : _c("p", [
+                    _vm._v("Depth: " + _vm._s(_vm.individualreading.depth)),
+                  ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "mt-3" }, [
+                !_vm.editing
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        on: {
+                          click: function ($event) {
+                            _vm.editing = true
+                          },
+                        },
+                      },
+                      [_vm._v("Edit")]
+                    )
+                  : _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        on: { click: _vm.updateReading },
+                      },
+                      [_vm._v("Save")]
+                    ),
               ]),
             ]
           )
@@ -40522,6 +40575,40 @@ Vue.compile = compileToFunctions;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Vue);
 
+
+/***/ }),
+
+/***/ "./resources/js sync recursive \\.vue$/":
+/*!************************************!*\
+  !*** ./resources/js/ sync \.vue$/ ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var map = {
+	"./components/List.vue": "./resources/js/components/List.vue",
+	"./components/Login.vue": "./resources/js/components/Login.vue",
+	"./components/Readings.vue": "./resources/js/components/Readings.vue"
+};
+
+
+function webpackContext(req) {
+	var id = webpackContextResolve(req);
+	return __webpack_require__(id);
+}
+function webpackContextResolve(req) {
+	if(!__webpack_require__.o(map, req)) {
+		var e = new Error("Cannot find module '" + req + "'");
+		e.code = 'MODULE_NOT_FOUND';
+		throw e;
+	}
+	return map[req];
+}
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = "./resources/js sync recursive \\.vue$/";
 
 /***/ })
 

@@ -13,15 +13,12 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 Route::get('/', function () {
     return view('auth.login');
 });
-
 Auth::routes();
 Route::post('/login', 'CustomAuthController@login');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/instruments', [\App\Http\Controllers\InstrumentController::class, 'instruments'])->name('getinstruments');
-Route::get('/readings/{instrumentid}', function ($instrumentid) {
-    return Reading::where('instrument_id', $instrumentid)->get();
-});
+Route::post('/reading/{readingid}', [\App\Http\Controllers\ReadingController::class, 'update'])->name('updatereading');
+Route::get('/readings/{instrumentid}', [\App\Http\Controllers\ReadingController::class, 'readings'])->name('readings');
