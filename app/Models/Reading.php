@@ -10,7 +10,11 @@ class Reading extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'instrument_id'
+    ];
+
     public function instrument() {
-        return $this->belongsTo('App\Instrument');
+        return $this->belongsTo('App\Models\Instrument');
     }
 }

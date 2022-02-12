@@ -44,7 +44,8 @@ class ReadingObserver
 
         $previous = Reading::where("created_at", "<", $reading->created_at)
             ->where("instrument_id", $reading->instrument_id)
-            ->where("id",'!=', $reading->id)->first();
+            ->where("id",'!=', $reading->id)
+            ->orderBy('created_at', 'desc')->first();
 
         if ($dip && $previous &&
             (abs($reading->dip - $dip) > 3 || abs($reading->azimuth - $previous->azimuth) > 5)) {
